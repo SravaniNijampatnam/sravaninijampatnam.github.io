@@ -1,0 +1,87 @@
+/* portrait.css — interactive portrait (hero -> docked avatar). No dependencies. */
+:root { --pt-accent: #38bdf8; --pt-accent2: #818cf8; }
+
+#pt-slot { width: min(100%, 440px); aspect-ratio: 1077 / 1460; margin-inline: auto; }
+
+#pt-stage {
+  position: fixed; left: 0; top: 0; z-index: 40; cursor: pointer;
+  perspective: 900px; will-change: transform, width, height;
+  -webkit-tap-highlight-color: transparent;
+}
+#pt-stage.is-hidden { display: none; }
+#pt-stage:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 6px; border-radius: 24px; }
+
+.pt-ring {                       /* slowly rotating gradient glow behind the card */
+  position: absolute; inset: -8px; border-radius: var(--r, 28px); filter: blur(14px); opacity: .55; overflow: hidden;
+}
+.pt-ring::before {
+  content: ""; position: absolute; inset: -60%;
+  background: conic-gradient(from 0deg, var(--pt-accent), transparent 30%, var(--pt-accent2), transparent 70%, var(--pt-accent));
+  animation: pt-spin 9s linear infinite;
+}
+@keyframes pt-spin { to { transform: rotate(360deg); } }
+
+.pt-card {
+  position: absolute; inset: 0; border-radius: var(--r, 28px); overflow: hidden; background: #1e293b;
+  box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.10);
+  transform-style: preserve-3d; will-change: transform;
+}
+.pt-card img {
+  position: absolute; left: -6%; top: -6%; width: 112%; height: 112%; object-fit: cover;
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0); will-change: transform; user-select: none; -webkit-user-drag: none;
+}
+.pt-img-hero { object-position: 50% 50%; }
+.pt-img-av   { object-position: 50% 50%; opacity: var(--avOp, 0); }
+.pt-glare {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 25%), rgba(255,255,255,.22), transparent 55%);
+}
+.pt-breathe { position: absolute; inset: 0; animation: pt-breathe 4.6s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes pt-breathe { 50% { transform: scale(1.012) translateY(-2px); } }
+
+.pt-chip {
+  position: absolute; pointer-events: none;
+  transform: translate3d(calc(var(--dx, 0) * var(--k, 14px)), calc(var(--dy, 0) * var(--k, 14px)), 0);
+  opacity: var(--chipOp, 1);
+}
+.pt-chip > span {
+  display: block; padding: 7px 13px; border-radius: 12px; background: #0f172a; color: #fff;
+  border: 1px solid var(--pt-accent); font: 700 13px/1 Inter, system-ui, sans-serif; white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  animation: pt-float 4s ease-in-out infinite; animation-delay: var(--d, 0s);
+}
+@keyframes pt-float { 50% { transform: translateY(-9px); } }
+.pt-chip[data-c="py"]  { left: -12%;  top: 14%;    --k: 18px; --d: 0s; }
+.pt-chip[data-c="sql"] { right: -10%; top: 8%;     --k: -14px; --d: .6s; }
+.pt-chip[data-c="gcp"] { left: -9%;   bottom: 26%; --k: 12px; --d: 1.2s; }
+.pt-chip[data-c="af"]  { right: -7%;  bottom: 12%; --k: -18px; --d: 1.8s; }
+
+.pt-pop { animation: pt-pop .5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pt-pop { 0% { transform: scale(.94); } 100% { transform: scale(1); } }
+
+#pt-bubble {
+  position: fixed; z-index: 41; max-width: 240px; padding: 10px 14px; border-radius: 14px;
+  font: 600 14px/1.35 Inter, system-ui, sans-serif; color: #0f172a; background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3); opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+#pt-bubble.show { opacity: 1; transform: none; }
+#pt-close {
+  position: fixed; z-index: 42; width: 26px; height: 26px; border: 0; border-radius: 50%;
+  background: rgba(15,23,42,.9); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+#pt-close:focus-visible { outline: 2px solid var(--pt-accent); }
+
+@media (max-width: 700px) { #pt-slot { width: min(68vw, 300px); } .pt-chip > span { font-size: 11px; padding: 5px 9px; } }
+@media (prefers-reduced-motion: reduce) {
+  .pt-ring::before, .pt-breathe, .pt-chip > span, .pt-pop { animation: none; }
+  #pt-bubble { transition: none; }
+}
+
+/* fallback when the photo cannot be loaded */
+.pt-noimg .pt-card img { display: none; }
+.pt-noimg .pt-card { background: linear-gradient(135deg, #1e3a5f, #312e81); }
+.pt-noimg .pt-card::after {
+  content: "SN"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff;
+  font: 800 calc(var(--w, 300px) * .3)/1 Inter, system-ui, sans-serif; letter-spacing: .02em;
+}
